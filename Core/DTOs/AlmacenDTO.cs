@@ -1,0 +1,11 @@
+﻿namespace AlmacenLP.Core.DTOs
+{
+    public class AlmacenDTO
+    {
+        public int IdSucursal { get; set; }
+        public string Codigo { get; set; }
+        public string Nombre { get; set; }
+        public int CapacidadMaxima { get; set; }
+        public int CantidadDisponible { get; set; }
+    }
+}
