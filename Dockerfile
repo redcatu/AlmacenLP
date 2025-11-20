@@ -2,29 +2,27 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
 
 # Fase de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copiamos el csproj y restauramos
+# CORRECCIÓN AQUÍ:
+# Copiamos el csproj a la raíz de /src
 COPY ["AlmacenLP.csproj", "./"]
+
+# Restauramos apuntando al archivo en la raíz, NO a una subcarpeta
 RUN dotnet restore "./AlmacenLP.csproj"
 
-# Copiamos todo el código
+# Copiamos todo el resto del código
 COPY . .
 
-# Build
-RUN dotnet build "./AlmacenLP.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-# Publicación
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./AlmacenLP.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Construimos y Publicamos en un solo paso optimizado
+RUN dotnet publish "./AlmacenLP.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Fase final
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AlmacenLP.dll"]
