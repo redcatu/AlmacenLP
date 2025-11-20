@@ -7,18 +7,20 @@ using AlmacenLP.Infraestructura.Repositorio;
 var builder = WebApplication.CreateBuilder(args);
 
 // -----------------------------------------------------------------------------
-// CONFIGURACIÓN DE PUERTO PARA RAILWAY
+// 1. CONFIGURACIÓN DE PUERTO (RAILWAY)
 // -----------------------------------------------------------------------------
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // -----------------------------------------------------------------------------
-// CONFIGURACIÓN DE BASE DE DATOS
+// 2. CONFIGURACIÓN DE BASE DE DATOS (LECTURA SIMPLE)
 // -----------------------------------------------------------------------------
-// La variable de entorno debe llamarse: ConnectionStrings__AlmacenLPContext
+// .NET leerá la variable de entorno: ConnectionStrings__AlmacenLPContext
+var connectionString = builder.Configuration.GetConnectionString("AlmacenLPContext") 
+    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'AlmacenLPContext'.");
+
 builder.Services.AddDbContext<AlmacenLPContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("AlmacenLPContext") 
-    ?? throw new InvalidOperationException("Connection string 'AlmacenLPContext' not found.")));
+    options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))); // Uso de SplitQuery para optimizar, opcional
 
 // -----------------------------------------------------------------------------
 // CORS
@@ -34,16 +36,14 @@ builder.Services.AddCors(options =>
 });
 
 // -----------------------------------------------------------------------------
-// SERVICIOS Y CONTROLADORES
+// SERVICIOS
 // -----------------------------------------------------------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
-// -----------------------------------------------------------------------------
-// INYECCIÓN DE DEPENDENCIAS (REPOSITORIOS)
-// -----------------------------------------------------------------------------
+// Repositorios
 builder.Services.AddScoped<IProductoRepositorio, ProductoRepositorio>();
 builder.Services.AddScoped<ICargaRepositorio, CargaRepositorio>();
 builder.Services.AddScoped<ICamionRepositorio, CamionRepositorio>();
@@ -55,41 +55,37 @@ builder.Services.AddScoped<ILoteRepositorio, LoteRepositorio>();
 var app = builder.Build();
 
 // -----------------------------------------------------------------------------
-// MIGRACIÓN AUTOMÁTICA DE BASE DE DATOS
+// MIGRACIÓN AUTOMÁTICA (ROBUSTO)
 // -----------------------------------------------------------------------------
-// Esto asegura que la BD se cree y tenga las tablas al iniciar en Railway
+// El logger ahora se inyecta correctamente en el ServiceProvider.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
+        logger.LogInformation("--> Intentando aplicar migraciones...");
         var context = services.GetRequiredService<AlmacenLPContext>();
-        // Aplica cualquier migración pendiente (crea la DB si no existe)
         context.Database.Migrate();
-        Console.WriteLine("--> Migraciones aplicadas correctamente.");
+        logger.LogInformation("--> Migraciones aplicadas correctamente. Base de datos lista.");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "--> Ocurrió un error al migrar la base de datos.");
+        logger.LogError(ex, "--> ERROR FATAL: Ocurrió un error al migrar o sembrar la base de datos.");
+        // Si la migración falla, es mejor que el servicio no continúe 
+        // para que Railway lo reinicie y muestre el error completo.
+        // throw; // Se podría usar para forzar el fallo, pero con el Logger es suficiente para el diagnóstico.
     }
 }
 
 // -----------------------------------------------------------------------------
-// PIPELINE DE LA APLICACIÓN
+// PIPELINE
 // -----------------------------------------------------------------------------
-
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// app.UseHttpsRedirection(); 
-
 app.UseCors("myApp");
-
 app.UseAuthorization();
-
 app.MapControllers();
-
-app.MapGet("/", () => "API AlmacenLP funcionando y conectada a DB!");
+app.MapGet("/", () => "API AlmacenLP funcionando! (DB conectada)");
 
 app.Run();
