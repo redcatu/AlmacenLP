@@ -13,14 +13,18 @@ var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // -----------------------------------------------------------------------------
-// 2. CONFIGURACIÓN DE BASE DE DATOS (LECTURA SIMPLE)
+// 2. CONFIGURACIÓN DE BASE DE DATOS (LECTURA Y DIAGNÓSTICO)
 // -----------------------------------------------------------------------------
 // .NET leerá la variable de entorno: ConnectionStrings__AlmacenLPContext
 var connectionString = builder.Configuration.GetConnectionString("AlmacenLPContext") 
     ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'AlmacenLPContext'.");
 
+// DIAGNÓSTICO: Imprimimos la cadena de conexión que se está usando (sin la contraseña por seguridad)
+var diagnosticConnectionString = new System.Text.RegularExpressions.Regex("Password=.*").Replace(connectionString, "Password=***REDACTED***");
+Console.WriteLine($"[DB DIAGNÓSTICO] Cadena de Conexión Usada: {diagnosticConnectionString}");
+
 builder.Services.AddDbContext<AlmacenLPContext>(options =>
-    options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))); // Uso de SplitQuery para optimizar, opcional
+    options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
 // -----------------------------------------------------------------------------
 // CORS
@@ -72,9 +76,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         logger.LogError(ex, "--> ERROR FATAL: Ocurrió un error al migrar o sembrar la base de datos.");
-        // Si la migración falla, es mejor que el servicio no continúe 
-        // para que Railway lo reinicie y muestre el error completo.
-        // throw; // Se podría usar para forzar el fallo, pero con el Logger es suficiente para el diagnóstico.
+        // throw; // Se deja la aplicación viva, pero el log debe mostrar el error real.
     }
 }
 
