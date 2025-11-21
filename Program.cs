@@ -15,17 +15,30 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 // -----------------------------------------------------------------------------
 // 2. CONFIGURACIÓN DE BASE DE DATOS (LECTURA Y DIAGNÓSTICO)
 // -----------------------------------------------------------------------------
-// .NET leerá la variable de entorno: ConnectionStrings__AlmacenLPContext
-var connectionString = builder.Configuration.GetConnectionString("AlmacenLPContext") 
-    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'AlmacenLPContext'.");
+// INTENTO 1: Leer variable de entorno "DATABASE" (Estilo Railway / Ejemplo Ingeniero)
+var connectionString = Environment.GetEnvironmentVariable("DATABASE");
 
-// DIAGNÓSTICO: Imprimimos la cadena de conexión que se está usando (sin la contraseña por seguridad)
-var diagnosticConnectionString = new System.Text.RegularExpressions.Regex("Password=.*").Replace(connectionString, "Password=***REDACTED***");
-Console.WriteLine($"[DB DIAGNÓSTICO] Cadena de Conexión Usada: {diagnosticConnectionString}");
+// INTENTO 2: Si es nulo, leer de appsettings.json (Estilo local .NET)
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = builder.Configuration.GetConnectionString("AlmacenLPContext");
+}
+
+// Validación final
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("No se encontró la cadena de conexión en la variable 'DATABASE' ni en 'AlmacenLPContext'.");
+}
+
+// DIAGNÓSTICO (Opcional: para ver en los logs de Railway si tomó la correcta)
+// Ocultamos el password para que no salga en el log
+var diagnosticConnectionString = new System.Text.RegularExpressions.Regex("Password=.*?;")
+    .Replace(connectionString, "Password=***REDACTED***;");
+    
+Console.WriteLine($"[DB CONNECTION] Usando cadena: {diagnosticConnectionString}");
 
 builder.Services.AddDbContext<AlmacenLPContext>(options =>
     options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
-
 // -----------------------------------------------------------------------------
 // CORS
 // -----------------------------------------------------------------------------
