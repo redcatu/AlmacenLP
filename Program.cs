@@ -15,7 +15,7 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 // -----------------------------------------------------------------------------
 // 2. CONFIGURACIÓN DE BASE DE DATOS (LECTURA Y DIAGNÓSTICO)
 // -----------------------------------------------------------------------------
-// INTENTO 1: Leer variable de entorno "DATABASE" (Estilo Railway / Ejemplo Ingeniero)
+// INTENTO 1: Leer variable de entorno "DATABASE"
 var connectionString = Environment.GetEnvironmentVariable("DATABASE");
 
 // INTENTO 2: Si es nulo, leer de appsettings.json (Estilo local .NET)
@@ -56,8 +56,6 @@ builder.Services.AddCors(options =>
 // SERVICIOS
 // -----------------------------------------------------------------------------
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
 // Repositorios
@@ -96,8 +94,7 @@ using (var scope = app.Services.CreateScope())
 // -----------------------------------------------------------------------------
 // PIPELINE
 // -----------------------------------------------------------------------------
-app.UseSwagger();
-app.UseSwaggerUI();
+
 app.UseCors("myApp");
 app.UseAuthorization();
 app.MapControllers();
