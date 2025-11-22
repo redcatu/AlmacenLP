@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AlmacenLP.Core.Entidades;
 using AlmacenLP.Infraestructura.Data;
 using AlmacenLP.Core.Interfaces;
+using AlmacenLP.Core.DTOs;
 
 namespace AlmacenLP.Presentacion.Controllers
 {
@@ -39,17 +40,17 @@ namespace AlmacenLP.Presentacion.Controllers
         // PUT: api/Almacenes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{Codigo}")]
-        public async Task<IActionResult> PutAlmacen(string Codigo, int NuevoIdSucursal, string NuevoCodigo, string NuevoNombre, int NuevaCapacidadMaxima, int NuevaCantidadDisponible)
+        public async Task<IActionResult> PutAlmacen(string Codigo, [FromBody] AlmacenDTO dto)
         {
-            return Ok(await context.PutAlmacen(Codigo, NuevoIdSucursal, NuevoCodigo, NuevoNombre, NuevaCapacidadMaxima, NuevaCantidadDisponible));
+            return Ok(await context.PutAlmacen(Codigo, dto));
         }
 
         // POST: api/Almacenes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostAlmacen(int IdSucursal, string Codigo, string Nombre, int CapacidadMaxima, int CantidadDisponible)
+        public async Task<IActionResult> PostAlmacen([FromBody] AlmacenDTO dto)
         {
-            return Ok(await context.PostAlmacen(IdSucursal, Codigo, Nombre, CapacidadMaxima, CantidadDisponible));
+            return Ok(await context.PostAlmacen(dto));
         }
 
         // DELETE: api/Almacenes/5

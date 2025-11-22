@@ -60,9 +60,8 @@ builder.Services.AddHttpClient();
 
 // Repositorios
 builder.Services.AddScoped<IProductoRepositorio, ProductoRepositorio>();
-builder.Services.AddScoped<ICargaRepositorio, CargaRepositorio>();
+builder.Services.AddScoped<IMovimientoInventarioRepositorio, MovimientoInventarioRepositorio>();
 builder.Services.AddScoped<IAlmacenRepositorio, AlmacenRepositorio>();
-builder.Services.AddScoped<IBajaProductoRepositorio, BajaProductoRepositorio>();
 builder.Services.AddScoped<IInventarioRepositorio, InventarioRepositorio>();
 builder.Services.AddScoped<ILoteRepositorio, LoteRepositorio>();
 

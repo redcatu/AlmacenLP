@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AlmacenLP.Core.Entidades;
 using AlmacenLP.Infraestructura.Data;
 using AlmacenLP.Core.Interfaces;
+using AlmacenLP.Core.DTOs;
 
 namespace AlmacenLP.Presentacion.Controllers
 {
@@ -39,17 +40,17 @@ namespace AlmacenLP.Presentacion.Controllers
         // PUT: api/Lotes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{Codigo}")]
-        public async Task<IActionResult> PutLote(string Codigo, int NuevoIdProducto, int NuevoIdAlmacen, string NuevoCodigo, int NuevaCantidad, DateTime NuevaFechaIngreso, DateTime NuevoFechaVencimiento)
+        public async Task<IActionResult> PutLote(string Codigo, [FromBody] LoteDTO dto)
         {
-            return Ok(await context.PutLote(Codigo, NuevoIdProducto, NuevoIdAlmacen, NuevoCodigo, NuevaCantidad, NuevaFechaIngreso, NuevoFechaVencimiento));
+            return Ok(await context.PutLote(Codigo, dto));
         }
 
         // POST: api/Lotes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostLote(int IdProducto, int IdAlmacen, string Codigo, int Cantidad, DateTime FechaIngreso, DateTime FechaVencimiento)
+        public async Task<IActionResult> PostLote([FromBody] LoteDTO dto)
         {
-            return Ok(await context.PostLote(IdProducto, IdAlmacen, Codigo, Cantidad, FechaIngreso, FechaVencimiento));
+            return Ok(await context.PostLote(dto));
         }
 
         // DELETE: api/Lotes/5

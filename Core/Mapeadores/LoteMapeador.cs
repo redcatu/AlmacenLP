@@ -9,8 +9,8 @@ namespace AlmacenLP.Core.Mapeadores
         {
             return new LoteDTO()
             {
-                IdProducto = lote.IdProducto,
-                IdAlmacen = lote.IdAlmacen,
+                CodigoProducto = lote.CodigoProducto,
+                CodigoAlmacen = lote.CodigoAlmacen,
                 Codigo = lote.Codigo,
                 Cantidad = lote.Cantidad,
                 FechaIngreso = lote.FechaIngreso,

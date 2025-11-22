@@ -32,6 +32,12 @@ namespace AlmacenLP.Presentacion.Controllers
             return Ok(await context.GetProductos());
         }
         // GET: api/Productos
+        [HttpGet("Ventas")]
+        public async Task<IActionResult> GetProductoVentas()
+        {
+            return Ok(await context.GetProductoVentas());
+        }
+        // GET: api/Productos
         [HttpGet("Lista Borrados")]
         public async Task<IActionResult> GetProductosBorrados()
         {

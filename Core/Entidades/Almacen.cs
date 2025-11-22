@@ -7,7 +7,7 @@ namespace AlmacenLP.Core.Entidades
     {
         [Key]
         public int Id { get; set; }
-        public int IdSucursal { get; set; }
+        public string CodigoSucursal { get; set; }
         public string Codigo { get; set; }
         public string Nombre { get; set; }
         public int CapacidadMaxima { get; set; }

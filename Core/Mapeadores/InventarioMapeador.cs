@@ -10,8 +10,9 @@ namespace AlmacenLP.Core.Mapeadores
         {
             return new InventarioDTO()
             {
-                IdProducto = inventario.IdProducto,
-                IdAlmacen = inventario.IdAlmacen,
+                CodigoProducto = inventario.CodigoProducto,
+                CodigoAlmacen = inventario.CodigoAlmacen,
+                CodigoLote = inventario.CodigoLote,
                 Codigo = inventario.Codigo,
                 ProductoStock = inventario.ProductoStock
             };

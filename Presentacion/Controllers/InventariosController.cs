@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AlmacenLP.Core.Entidades;
 using AlmacenLP.Infraestructura.Data;
 using AlmacenLP.Core.Interfaces;
+using AlmacenLP.Core.DTOs;
 
 namespace AlmacenLP.Presentacion.Controllers
 {
@@ -39,17 +40,17 @@ namespace AlmacenLP.Presentacion.Controllers
         // PUT: api/Inventarios/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{Codigo}")]
-        public async Task<IActionResult> PutInventario(string Codigo, int NuevoIdAlmacen, int NuevoIdProducto, string NuevoCodigo, int NuevoProductoStock)
+        public async Task<IActionResult> PutInventario(string Codigo, [FromBody] InventarioDTO dto)
         { 
-            return Ok(await context.PutInventario(Codigo, NuevoIdAlmacen, NuevoIdProducto, NuevoCodigo, NuevoProductoStock));
+            return Ok(await context.PutInventario(Codigo, dto));
         }
 
         // POST: api/Inventarios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostInventario(int IdAlmacen, int IdProducto, string Codigo, int ProductoStock)
+        public async Task<IActionResult> PostInventario([FromBody] InventarioDTO dto)
         {
-            return Ok(await context.PostInventario(IdAlmacen, IdAlmacen, Codigo, ProductoStock));
+            return Ok(await context.PostInventario(dto));
         }
 
         // DELETE: api/Inventarios/5

@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AlmacenLP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e331404623dd8c456a1a2e0254e9abc5934550d8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+261b0689c28df115de719eadd31386e27d98d72e")]
 [assembly: System.Reflection.AssemblyProductAttribute("AlmacenLP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AlmacenLP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

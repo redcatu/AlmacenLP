@@ -22,9 +22,9 @@ namespace AlmacenLP.Infraestructura.Repositorio
             var inventario = await context.Inventario.FirstOrDefaultAsync(p => p.Codigo == Codigo);
             if (inventario == null)
             {
-                throw new Exception("Almacen no encontrado");
+                throw new Exception("Inventario no encontrado");
             }
-            inventario.Estado = "Inactivo";
+            inventario.Estado = "Borrado";
             context.Inventario.Update(inventario);
             await context.SaveChangesAsync();
 
@@ -47,14 +47,14 @@ namespace AlmacenLP.Infraestructura.Repositorio
                           select c.toInventarioDTO()).FirstOrDefaultAsync();
         }
 
-        public async Task<InventarioDTO> PostInventario(int IdAlmacen, int IdProducto, string Codigo, int ProductoStock)
+        public async Task<InventarioDTO> PostInventario([FromBody] InventarioDTO dto)
         {
             var inventario = new Inventario
             {
-                IdAlmacen = IdAlmacen,
-                IdProducto = IdProducto,
-                Codigo = Codigo,
-                ProductoStock = ProductoStock
+                CodigoAlmacen = dto.CodigoAlmacen,
+                CodigoProducto = dto.CodigoProducto,
+                Codigo = dto.Codigo,
+                ProductoStock = dto.ProductoStock
 
             };
             context.Inventario.Add(inventario);
@@ -62,13 +62,17 @@ namespace AlmacenLP.Infraestructura.Repositorio
             return inventario.toInventarioDTO();
         }
 
-        public async Task<InventarioDTO> PutInventario(string Codigo, int NuevoIdAlmacen, int NuevoIdProducto, string NuevoCodigo, int NuevoProductoStock)
+        public async Task<InventarioDTO> PutInventario(string Codigo, [FromBody] InventarioDTO dto)
         {
             var inventario = await context.Inventario.FirstOrDefaultAsync(c => c.Codigo == Codigo);
             if (inventario == null)
             {
                 throw new Exception("Inventario no encontrado");
             }
+            inventario.CodigoAlmacen = dto.CodigoAlmacen;
+            inventario.CodigoProducto = dto.CodigoProducto;
+            inventario.CodigoLote = dto.CodigoLote;
+            inventario.ProductoStock = dto.ProductoStock;
             context.Inventario.Update(inventario);
             await context.SaveChangesAsync();
             return inventario.toInventarioDTO();

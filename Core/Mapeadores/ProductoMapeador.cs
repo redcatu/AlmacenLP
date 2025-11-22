@@ -18,5 +18,14 @@ namespace AlmacenLP.Core.Mapeadores
                Marca = producto.Marca
             };
         }
+        public static ProductoVentasDTO toProductoVentasDTO(this Producto producto)
+        {
+            return new ProductoVentasDTO()
+            {
+                Codigo = producto.Codigo,
+                Nombre = producto.Nombre,
+                Precio = producto.Precio
+            };
+        }
     }
 }

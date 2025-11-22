@@ -15,6 +15,6 @@ namespace AlmacenLP.Core.Entidades
         public DateTime FechaIngreso { get; set; }
         [Column(TypeName = "date")]
         public DateTime FechaVencimiento { get; set; }
-        public string Estado { get; set; } = "Disponible";
+        public string Estado { get; set; } = "Activo";
     }
 }

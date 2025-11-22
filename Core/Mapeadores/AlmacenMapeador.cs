@@ -8,9 +8,9 @@ namespace AlmacenLP.Core.Mapeadores
     {
         public static AlmacenDTO toAlmacenDTO(this Almacen almacen)
         {
-            return new AlmacenDTO
+            return new AlmacenDTO()
             {
-                IdSucursal = almacen.IdSucursal,
+                CodigoSucursal = almacen.CodigoSucursal,
                 Codigo = almacen.Codigo,
                 Nombre = almacen.Nombre,
                 CapacidadMaxima = almacen.CapacidadMaxima,

@@ -7,8 +7,8 @@ namespace AlmacenLP.Core.Interfaces
     {
         Task<List<InventarioDTO>> GetInventario();
         Task<InventarioDTO> GetInventario(string Codigo);
-        Task<InventarioDTO> PutInventario(string Codigo, int NuevoIdAlmacen, int NuevoIdProducto, string NuevoCodigo, int NuevoProductoStock);
-        Task<InventarioDTO> PostInventario(int IdAlmacen, int IdProducto, string Codigo, int ProductoStock);
+        Task<InventarioDTO> PutInventario(string Codigo, [FromBody] InventarioDTO dto);
+        Task<InventarioDTO> PostInventario([FromBody] InventarioDTO dto);
         Task<InventarioDTO> DeleteInventario(string Codigo);
     }
 }

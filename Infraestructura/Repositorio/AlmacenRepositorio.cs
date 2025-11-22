@@ -3,6 +3,7 @@ using AlmacenLP.Core.Entidades;
 using AlmacenLP.Core.Interfaces;
 using AlmacenLP.Core.Mapeadores;
 using AlmacenLP.Infraestructura.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 
@@ -22,7 +23,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
             {
                 throw new Exception("Almacen no encontrado");
             }
-            almacen.Estado = "Inactivo";
+            almacen.Estado = "Borrado";
             context.Almacen.Update(almacen);
             await context.SaveChangesAsync();
 
@@ -32,7 +33,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
         public async Task<List<AlmacenDTO>> GetAlmacen()
         {
             var almacen = await (from c in context.Almacen
-                                where c.Estado != "Inactivo"
+                                where c.Estado != "Borrado"
                                 select c
                          ).Select(ca => ca.toAlmacenDTO()).ToListAsync();
             return almacen;
@@ -45,33 +46,33 @@ namespace AlmacenLP.Infraestructura.Repositorio
                           select c.toAlmacenDTO()).FirstOrDefaultAsync();
         }
 
-        public async Task<AlmacenDTO> PostAlmacen(int IdSucursal, string Codigo, string Nombre, int CapacidadMaxima, int CantidadDisponible)
+        public async Task<AlmacenDTO> PostAlmacen([FromBody] AlmacenDTO dto)
         {
             var almacen = new Almacen
             {
-                IdSucursal = IdSucursal,
-                Codigo = Codigo,
-                Nombre = Nombre,
-                CapacidadMaxima = CapacidadMaxima,
-                CantidadDisponible = CantidadDisponible
+                CodigoSucursal = dto.CodigoSucursal,
+                Codigo = dto.Codigo,
+                Nombre = dto.Nombre,
+                CapacidadMaxima = dto.CapacidadMaxima,
+                CantidadDisponible = dto.CantidadDisponible
             };
             context.Almacen.Add(almacen);
             await context.SaveChangesAsync();
             return almacen.toAlmacenDTO();
         }
 
-        public async Task<AlmacenDTO> PutAlmacen(string Codigo, int NuevoIdSucursal, string NuevoCodigo, string NuevoNombre, int NuevaCapacidadMaxima, int NuevaCantidadDisponible)
+        public async Task<AlmacenDTO> PutAlmacen(string Codigo, [FromBody] AlmacenDTO dto)
         {
             var almacen = await context.Almacen.FirstOrDefaultAsync(c => c.Codigo == Codigo);
             if (almacen == null)
             {
                 throw new Exception("Almacen no encontrado");
             }
-            almacen.IdSucursal = NuevoIdSucursal;
-            almacen.Codigo = NuevoCodigo;
-            almacen.Nombre = NuevoNombre;
-            almacen.CapacidadMaxima = NuevaCapacidadMaxima;
-            almacen.CantidadDisponible = NuevaCantidadDisponible;
+            almacen.CodigoSucursal = dto.CodigoSucursal;
+            almacen.Codigo = dto.Codigo;
+            almacen.Nombre = dto.Nombre;
+            almacen.CapacidadMaxima = dto.CapacidadMaxima;
+            almacen.CantidadDisponible = dto.CantidadDisponible;
             context.Almacen.Update(almacen);
             await context.SaveChangesAsync();
             return almacen.toAlmacenDTO();

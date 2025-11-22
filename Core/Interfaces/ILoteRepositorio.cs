@@ -7,8 +7,8 @@ namespace AlmacenLP.Core.Interfaces
     {
         Task<List<LoteDTO>> GetLote();
         Task<LoteDTO> GetLote(string Codigo);
-        Task<LoteDTO> PutLote(string Codigo, int NuevoIdProducto, int NuevoIdAlmacen, string NuevoCodigo, int Cantidad, DateTime NuevaFechaIngreso, DateTime NuevoFechaVencimiento);
-        Task<LoteDTO> PostLote(int IdProducto, int IdAlmacen, string Codigo, int Cantidad, DateTime FechaIngreso, DateTime FechaVencimiento);
+        Task<LoteDTO> PutLote(string Codigo, [FromBody] LoteDTO dto);
+        Task<LoteDTO> PostLote([FromBody] LoteDTO dto);
         Task<LoteDTO> DeleteLote(string Codigo);
     }
 }

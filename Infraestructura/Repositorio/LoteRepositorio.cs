@@ -3,6 +3,7 @@ using AlmacenLP.Core.Entidades;
 using AlmacenLP.Core.Interfaces;
 using AlmacenLP.Core.Mapeadores;
 using AlmacenLP.Infraestructura.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -24,7 +25,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
             {
                 throw new Exception("Lote no encontrado");
             }
-            lote.Estado = "No disponible";
+            lote.Estado = "Borrado";
             context.Lote.Update(lote);
             await context.SaveChangesAsync();
 
@@ -34,7 +35,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
         public async Task<List<LoteDTO>> GetLote()
         {
             var lote = await (from c in context.Lote
-                                 where c.Estado != "No disponible"
+                                 where c.Estado != "Borrado"
                                  select c
                          ).Select(ca => ca.toLoteDTO()).ToListAsync();
             return lote;
@@ -47,35 +48,35 @@ namespace AlmacenLP.Infraestructura.Repositorio
                           select c.toLoteDTO()).FirstOrDefaultAsync();
         }
 
-        public async Task<LoteDTO> PostLote(int IdProducto, int IdAlmacen, string Codigo, int Cantidad, DateTime FechaIngreso, DateTime FechaVencimiento)
+        public async Task<LoteDTO> PostLote([FromBody] LoteDTO dto)
         {
             var lote = new Lote
             {
-                IdProducto = IdProducto,
-                IdAlmacen = IdAlmacen,
-                Codigo = Codigo,
-                Cantidad = Cantidad,
-                FechaIngreso = FechaIngreso,
-                FechaVencimiento = FechaVencimiento
+                CodigoProducto = dto.CodigoProducto,
+                CodigoAlmacen = dto.CodigoAlmacen,
+                Codigo = dto.Codigo,
+                Cantidad = dto.Cantidad,
+                FechaIngreso = dto.FechaIngreso,
+                FechaVencimiento = dto.FechaVencimiento
             };
             context.Lote.Add(lote);
             await context.SaveChangesAsync();
             return lote.toLoteDTO();
         }
 
-        public async Task<LoteDTO> PutLote(string Codigo, int NuevoIdProducto, int NuevoIdAlmacen, string NuevoCodigo, int Cantidad, DateTime NuevaFechaIngreso, DateTime NuevoFechaVencimiento)
+        public async Task<LoteDTO> PutLote(string Codigo, [FromBody] LoteDTO dto)
         {
             var lote = await context.Lote.FirstOrDefaultAsync(c => c.Codigo == Codigo);
             if (lote == null)
             {
                 throw new Exception("Lote no encontrado");
             }
-            lote.IdProducto = NuevoIdProducto;
-            lote.IdAlmacen = NuevoIdAlmacen;
-            lote.Codigo = NuevoCodigo;
-            lote.Cantidad = Cantidad;
-            lote.FechaIngreso = NuevaFechaIngreso;
-            lote.FechaVencimiento = NuevoFechaVencimiento;
+            lote.CodigoProducto = dto.CodigoProducto;
+            lote.CodigoAlmacen = dto.CodigoAlmacen;
+            lote.Codigo = dto.Codigo;
+            lote.Cantidad = dto.Cantidad;
+            lote.FechaIngreso = dto.FechaIngreso;
+            lote.FechaVencimiento = dto.FechaVencimiento;
             await context.SaveChangesAsync();
             return lote.toLoteDTO();
         }

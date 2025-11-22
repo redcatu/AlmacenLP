@@ -17,7 +17,8 @@ namespace AlmacenLP.Core.Interfaces
         Task<ProductoDTO> DeleteProducto(string codigo);
         //La utilidad de esta funcion es cambiar los valores de los atributos de un producto.
         Task<ProductoDTO> PutProducto(string codigo, [FromBody] ProductoDTO dto);
-        
+        //Endpoint externo para ofrecer servicio a Ventas sobre la informacion de los productos
+        Task<List<ProductoVentasDTO>> GetProductoVentas();
 
 
     }

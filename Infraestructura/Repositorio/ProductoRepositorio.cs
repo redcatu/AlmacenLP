@@ -28,7 +28,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
         public async Task<List<ProductoDTO>> GetProductos()
         {
             var producto = await (from p in context.Producto
-                          where p.Estado != "Inactivo"
+                          where p.Estado != "Borrado"
                           select p
                           ).Select(pr => pr.toProductoDTO()).ToListAsync();
             return producto;
@@ -36,7 +36,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
         public async Task<List<ProductoDTO>> GetProductosBorrados()
         {
             var producto = await (from p in context.Producto
-                                  where p.Estado == "Inactivo"
+                                  where p.Estado == "Borrado"
                                   select p
                           ).Select(pr => pr.toProductoDTO()).ToListAsync();
             return producto;
@@ -65,7 +65,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
             {
                 throw new Exception("Producto no encontrado.");
             }
-            producto.Estado = "Inactivo";
+            producto.Estado = "Borrado";
             context.Producto.Update(producto);
             await context.SaveChangesAsync();
 
@@ -92,6 +92,14 @@ namespace AlmacenLP.Infraestructura.Repositorio
             await context.SaveChangesAsync();
 
             return productoActual.toProductoDTO();
+        }
+        public async Task<List<ProductoVentasDTO>> GetProductoVentas()
+        {
+            var producto = await(from p in context.Producto
+                                 where p.Estado != "Borrado"
+                                 select p
+                          ).Select(pr => pr.toProductoVentasDTO()).ToListAsync();
+            return producto;
         }
     }
 }
