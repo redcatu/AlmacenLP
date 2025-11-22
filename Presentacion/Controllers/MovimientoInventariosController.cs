@@ -72,7 +72,7 @@ namespace AlmacenLP.Presentacion.Controllers
         }
         // POST: api/MovimientoInventario/Devuelto
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("Devuelto")]
         public async Task<IActionResult> PostDevuelto([FromBody] MovimientoInventarioDTO dto)
         {
             return Ok(await context.PostDevuelto(dto));
