@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("3864258e-f0a0-4d8a-876a-d24de9f18310")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("AlmacenLP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e331404623dd8c456a1a2e0254e9abc5934550d8")]
 [assembly: System.Reflection.AssemblyProductAttribute("AlmacenLP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AlmacenLP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

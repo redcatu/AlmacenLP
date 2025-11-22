@@ -169,6 +169,25 @@
         }
       }
     },
+    "/": {
+      "get": {
+        "tags": [
+          "AlmacenLP"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/BajaProductos": {
       "get": {
         "tags": [

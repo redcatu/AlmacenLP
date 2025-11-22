@@ -480,3 +480,4 @@ C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\refint\AlmacenLP.dll
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\AlmacenLP.pdb
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\AlmacenLP.genruntimeconfig.cache
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\ref\AlmacenLP.dll
+C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\AlmacenLP.sourcelink.json
