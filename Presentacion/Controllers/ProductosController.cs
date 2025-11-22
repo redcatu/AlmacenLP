@@ -1,6 +1,5 @@
 ﻿using AlmacenLP.Core.DTOs;
 using AlmacenLP.Core.Entidades;
-using AlmacenLP.Core.Entidades;
 using AlmacenLP.Core.Interfaces;
 using AlmacenLP.Infraestructura.Data;
 using Humanizer;
