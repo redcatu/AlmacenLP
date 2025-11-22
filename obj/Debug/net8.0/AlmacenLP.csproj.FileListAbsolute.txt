@@ -473,7 +473,6 @@ C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\staticwebassets.development.json
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\swae.build.ex.cache
-C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\AlmacenLP.csproj.Up2Date
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\AlmacenLP.dll
 C:\VS\Proyecto_Final\AlmacenLP\obj\Debug\net8.0\refint\AlmacenLP.dll
