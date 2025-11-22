@@ -25,7 +25,7 @@ namespace AlmacenLP.Presentacion.Controllers
         }
         
         // GET: api/Productos
-        [HttpGet("Lista")]
+        [HttpGet]
         public async Task<IActionResult> GetProductos()
         {
             return Ok(await context.GetProductos());
