@@ -65,6 +65,27 @@ namespace AlmacenLP.Infraestructura.Repositorio
                           select p.toMovimientoInventarioDTO()).FirstOrDefaultAsync();
         }
 
+        public async Task<MovimientoInventarioDTO> PostDevuelto([FromBody] MovimientoInventarioDTO dto)
+        {
+            var entity = new MovimientoInventario
+            {
+                CodigoProducto = dto.CodigoProducto,
+                CodigoCamion = dto.CodigoCamion,
+                CodigoAlmacen = dto.CodigoAlmacen,
+                CodigoVenta = dto.CodigoVenta,
+                CodigoLote = dto.CodigoLote,
+                Codigo = dto.Codigo,
+                CantidadBuena = dto.CantidadBuena,
+                CantidadMala = dto.CantidadMala,
+                TipoMovimiento = "Devuelto",
+                Motivo = dto.Motivo,
+                Fecha = dto.Fecha,
+            };
+            context.MovimientoInventario.Add(entity);
+            await context.SaveChangesAsync();
+            return entity.toMovimientoInventarioDTO();
+        }
+
         public async Task<MovimientoInventarioDTO> PostMovimientoInventario([FromBody] MovimientoInventarioDTO dto)
         {
             var entity = new MovimientoInventario
