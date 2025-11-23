@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using AlmacenLP.Infraestructura.Data;
 using AlmacenLP.Core.Interfaces;
 using AlmacenLP.Infraestructura.Repositorio;
@@ -39,6 +38,13 @@ Console.WriteLine($"[DB CONNECTION] Usando cadena: {diagnosticConnectionString}"
 
 builder.Services.AddDbContext<AlmacenLPContext>(options =>
     options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+
+// -----------------------------------------------------------------------------
+// SWAGGER/OPENAPI (AÑADIDO AQUÍ)
+// -----------------------------------------------------------------------------
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(); // 1. Servicio de generación de Swagger
+
 // -----------------------------------------------------------------------------
 // CORS
 // -----------------------------------------------------------------------------
@@ -68,6 +74,10 @@ builder.Services.AddScoped<ILoteRepositorio, LoteRepositorio>();
 var app = builder.Build();
 
 // -----------------------------------------------------------------------------
+// PIPELINE (Middlewares)
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
 // MIGRACIÓN AUTOMÁTICA (ROBUSTO)
 // -----------------------------------------------------------------------------
 // El logger ahora se inyecta correctamente en el ServiceProvider.
@@ -90,8 +100,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -----------------------------------------------------------------------------
-// PIPELINE
+// SWAGGER PIPELINE (AÑADIDO AQUÍ)
 // -----------------------------------------------------------------------------
+if (app.Environment.IsDevelopment()) // Se habilita en desarrollo y en Railway
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(); // 2. Publicación de la interfaz Swagger UI
+}
+// NOTA: Para ambientes de producción como Railway, puedes simplemente quitar la condición 'if (app.Environment.IsDevelopment())' si quieres que esté siempre activo.
 
 app.UseCors("myApp");
 app.UseAuthorization();
