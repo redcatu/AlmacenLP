@@ -70,13 +70,7 @@ namespace AlmacenLP.Presentacion.Controllers
         {
             return Ok(await context.PostMovimientoInventario(dto));
         }
-        // POST: api/MovimientoInventario/Devuelto
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("Devuelto")]
-        public async Task<IActionResult> PostDevuelto([FromBody] MovimientoInventarioDTO dto)
-        {
-            return Ok(await context.PostDevuelto(dto));
-        }
+        
         // DELETE: api/MovimientoInventarios/5
         [HttpDelete("{Codigo}")]
         public async Task<IActionResult> DeleteMovimientoInventario(string Codigo)

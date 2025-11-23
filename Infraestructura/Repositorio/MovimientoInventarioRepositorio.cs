@@ -11,10 +11,12 @@ namespace AlmacenLP.Infraestructura.Repositorio
     public class MovimientoInventarioRepositorio : IMovimientoInventarioRepositorio
     {
         private readonly AlmacenLPContext context;
+        private readonly ILoteRepositorio loteRepositorio;
 
         public MovimientoInventarioRepositorio(AlmacenLPContext context)
         {
             this.context = context;
+            this.loteRepositorio = new LoteRepositorio(context);
         }
 
         public async Task<MovimientoInventarioDTO> DeleteMovimientoInventario(string Codigo)
@@ -41,12 +43,12 @@ namespace AlmacenLP.Infraestructura.Repositorio
             return movimientoInventario;
         }
 
-        public async Task<List<MovimientoInventarioDistribucionDTO>> GetCargaSucursal()
+        public async Task<List<MovimientoInventarioSucursalDTO>> GetCargaSucursal()
         {
             var movimientoInventario = await(from p in context.MovimientoInventario
                                              where p.Estado != "Borrado"
                                              select p
-                          ).Select(pr => pr.toMovimientoInventarioDistribucionDTO()).ToListAsync();
+                          ).Select(pr => pr.toMovimientoInventarioSucursalDTO()).ToListAsync();
             return movimientoInventario;
         }
 
@@ -66,59 +68,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
                           select p.toMovimientoInventarioDTO()).FirstOrDefaultAsync();
         }
 
-        public async Task<MovimientoInventarioDTO> PostDevuelto([FromBody] MovimientoInventarioDTO dto)
-        {
-            if (string.IsNullOrEmpty(dto.CodigoLote))
-            {
-                throw new Exception("Una devolución debe especificar el CodigoLote original");
-            }
-            int cantidadBuena = dto.CantidadBuena ?? 0;
-            int cantidadTotal = cantidadBuena + (dto.CantidadMala ?? 0);
-
-            var almacen = await context.Almacen.FirstOrDefaultAsync(a => a.Codigo == dto.CodigoAlmacen);
-            var inventario = await context.Inventario.FirstOrDefaultAsync(i =>
-                i.CodigoAlmacen == dto.CodigoAlmacen &&
-                i.CodigoProducto == dto.CodigoProducto);
-            var lote = await context.Lote.FirstOrDefaultAsync(l => l.Codigo == dto.CodigoLote);
-
-            if (almacen == null || inventario == null || lote == null)
-            {
-                throw new Exception("Error: Almacén, Inventario maestro o Lote original no encontrado.");
-            }
-            if (cantidadTotal > 0)
-            {
-                lote.Cantidad += cantidadBuena;
-                lote.Estado = "Activo";
-                context.Lote.Update(lote);
-                inventario.ProductoStock += cantidadBuena;
-                context.Inventario.Update(inventario);
-                almacen.CantidadDisponible -= cantidadTotal;
-
-                if (almacen.CantidadDisponible < 0)
-                {
-                    almacen.CantidadDisponible = 0;
-                }
-                context.Almacen.Update(almacen);
-            }
         
-                var entity = new MovimientoInventario
-            {
-                CodigoProducto = dto.CodigoProducto,
-                CodigoCamion = dto.CodigoCamion,
-                CodigoAlmacen = dto.CodigoAlmacen,
-                CodigoVenta = dto.CodigoVenta,
-                CodigoLote = dto.CodigoLote,
-                Codigo = dto.Codigo,
-                CantidadBuena = dto.CantidadBuena,
-                CantidadMala = dto.CantidadMala,
-                TipoMovimiento = "Devuelto",
-                Motivo = dto.Motivo,
-                Fecha = dto.Fecha,
-            };
-            context.MovimientoInventario.Add(entity);
-            await context.SaveChangesAsync();
-            return entity.toMovimientoInventarioDTO();
-        }
         private async Task AplicarDescuentosLotes(string codigoAlmacen, string codigoProducto, int cantidadTotalASacar)
         {
             var lotesActivos = await context.Lote.Where(l => l.CodigoAlmacen == codigoAlmacen &&
@@ -145,46 +95,18 @@ namespace AlmacenLP.Infraestructura.Repositorio
         }
         public async Task<MovimientoInventarioDTO> PostMovimientoInventario([FromBody] MovimientoInventarioDTO dto)
         {
-            int cantidadTotalMovimiento = (dto.CantidadBuena ?? 0) + (dto.CantidadMala ?? 0);
+            var almacen = await context.Almacen.FirstOrDefaultAsync(a => a.Codigo == dto.CodigoAlmacen);
+            var inventario = await context.Inventario
+                .FirstOrDefaultAsync(i => i.CodigoAlmacen == dto.CodigoAlmacen && i.CodigoProducto == dto.CodigoProducto);
 
-            if (cantidadTotalMovimiento > 0)
+            if (almacen == null) throw new Exception("El código de almacén no existe.");
+            if (inventario == null) throw new Exception("No existe registro de inventario para este producto/almacén. Debe inicializarlo primero.");
+            if (await context.MovimientoInventario.AnyAsync(m => m.Codigo == dto.Codigo))
             {
-                var inventario = await context.Inventario.FirstOrDefaultAsync(i =>
-                    i.CodigoAlmacen == dto.CodigoAlmacen &&
-                    i.CodigoProducto == dto.CodigoProducto);
-
-                if (inventario == null)
-                {
-                    throw new Exception($"No existe un registro de inventario maestro para el producto {dto.CodigoProducto} en el almacén {dto.CodigoAlmacen}.");
-                }
-                var almacen = await context.Almacen.FirstOrDefaultAsync(a => a.Codigo == dto.CodigoAlmacen);
-                if (almacen == null)
-                {
-                    throw new Exception("El código de almacén no existe.");
-                }
-
-                if (dto.TipoMovimiento == "Salida")
-                {
-                    if (cantidadTotalMovimiento > inventario.ProductoStock)
-                    {
-                        throw new Exception($"Error de Stock: La cantidad solicitada ({cantidadTotalMovimiento}) excede el stock disponible ({inventario.ProductoStock}) para el producto {dto.CodigoProducto}");
-                    }
-                    inventario.ProductoStock -= cantidadTotalMovimiento;
-                    context.Inventario.Update(inventario);
-                    almacen.CantidadDisponible += cantidadTotalMovimiento;
-                    context.Almacen.Update(almacen);
-                    await AplicarDescuentosLotes(dto.CodigoAlmacen, dto.CodigoProducto, cantidadTotalMovimiento);
-                }
-
-                else if (dto.TipoMovimiento == "Entrada" || dto.TipoMovimiento == "Devolucion")
-                {                    
-                    inventario.ProductoStock += cantidadTotalMovimiento;
-                    context.Inventario.Update(inventario);
-                    almacen.CantidadDisponible -= cantidadTotalMovimiento;
-                    context.Almacen.Update(almacen);
-                }
+                throw new Exception($"El código de movimiento '{dto.Codigo}' ya existe en el sistema.");
             }
-            var entity = new MovimientoInventario
+
+            var movimiento = new MovimientoInventario
             {
                 CodigoProducto = dto.CodigoProducto,
                 CodigoCamion = dto.CodigoCamion,
@@ -198,13 +120,149 @@ namespace AlmacenLP.Infraestructura.Repositorio
                 Motivo = dto.Motivo,
                 Fecha = dto.Fecha,
             };
+            if (movimiento.TipoMovimiento == "Salida")
+            {
+                // Lógica Crítica de Salida / Venta (FIFO)
+                await ProcesarSalidaFIFO(movimiento, inventario, almacen);
+            }
+            else if (movimiento.TipoMovimiento == "Entrada")
+            {
+                // Lógica de Entrada Genérica (Creación de Lote para Compras/Ingresos)
+                await ProcesarEntradaGenerica(movimiento, almacen);
+            }
+            else if (movimiento.TipoMovimiento == "Devuelto")
+            {
+                // Lógica de Devolución (añade stock bueno al lote y consume capacidad por stock total)
+                await ProcesarDevolucion(movimiento, almacen);
+            }
+            context.MovimientoInventario.Add(movimiento);
+            context.Almacen.Update(almacen);
 
-            context.MovimientoInventario.Add(entity);
             await context.SaveChangesAsync();
 
-            return entity.toMovimientoInventarioDTO();
+            // 6. Sincronizar stock del Inventario (Regla B2)
+            // Esto asegura que el ProductoStock en Inventario sea la suma actual de todos los lotes restantes.
+            await loteRepositorio.RecalcularStockInventario(movimiento.CodigoAlmacen, movimiento.CodigoProducto);
+
+            return movimiento.toMovimientoInventarioDTO();
+        }
+        private async Task ProcesarDevolucion(MovimientoInventario movimiento, Almacen almacen)
+        {
+            if (string.IsNullOrEmpty(movimiento.CodigoLote))
+            {
+                throw new Exception("Una devolución (Devuelto) debe especificar el CodigoLote original al que se devuelve el stock.");
+            }
+
+            int cantidadBuena = movimiento.CantidadBuena ?? 0;
+            int cantidadMala = movimiento.CantidadMala ?? 0;
+            int cantidadTotal = cantidadBuena + cantidadMala;
+
+            var lote = await context.Lote.FirstOrDefaultAsync(l => l.Codigo == movimiento.CodigoLote);
+
+            if (lote == null)
+            {
+                throw new Exception($"Error: Lote original '{movimiento.CodigoLote}' no encontrado.");
+            }
+
+            // Regla B4: Validar capacidad (Espacio Libre) para el total devuelto.
+            if (cantidadTotal > almacen.CantidadDisponible)
+            {
+                throw new Exception($"Capacidad excedida: El almacén solo tiene {almacen.CantidadDisponible} espacio libre para el total de la devolución ({cantidadTotal}).");
+            }
+
+            if (cantidadTotal > 0)
+            {
+                // 1. Devolver solo la Cantidad Buena al Lote
+                lote.Cantidad += cantidadBuena;
+                lote.Estado = "Activo"; // Aseguramos que el lote esté activo si regresa stock.
+                context.Lote.Update(lote);
+
+                // 2. Ocupar el espacio: El espacio libre DISMINUYE por la Cantidad Total (Buena + Mala)
+                // Esto considera que el stock malo ocupa espacio de cuarentena/descarte.
+                almacen.CantidadDisponible -= cantidadTotal;
+
+                // Nota: El Inventario.ProductoStock será recalculado por la Regla B2 al final del PostMovimientoInventario.
+            }
+        }
+        private async Task ProcesarEntradaGenerica(MovimientoInventario movimiento, Almacen almacen)
+        {
+            // La entrada genérica crea un nuevo lote.
+            int cantidadIngresada = movimiento.CantidadBuena ?? 0;
+
+            // Regla B4: Validar capacidad (Espacio Libre)
+            if (cantidadIngresada > almacen.CantidadDisponible)
+            {
+                throw new Exception($"Capacidad excedida: El almacén solo tiene {almacen.CantidadDisponible} espacio libre para el ingreso.");
+            }
+
+            // Ocupar el espacio: El espacio libre DISMINUYE 
+            almacen.CantidadDisponible -= cantidadIngresada;
+
+            // Crear un código de lote único.
+            string nuevoCodigoLote = $"LOTE-ING-{movimiento.Codigo}";
+
+            if (await context.Lote.AnyAsync(l => l.Codigo == nuevoCodigoLote))
+            {
+                throw new Exception($"Error: El lote de ingreso {nuevoCodigoLote} ya existe.");
+            }
+
+            var lote = new Lote
+            {
+                CodigoProducto = movimiento.CodigoProducto,
+                CodigoAlmacen = movimiento.CodigoAlmacen,
+                Codigo = nuevoCodigoLote,
+                Cantidad = cantidadIngresada,
+                FechaIngreso = movimiento.Fecha,
+                FechaVencimiento = DateTime.Today.AddYears(1), // Fecha de vencimiento genérica 
+                Estado = "Activo"
+            };
+
+            context.Lote.Add(lote);
         }
 
+        // -----------------------------------------------------------------
+        // Lógica de Salida FIFO (Regla B7)
+        // -----------------------------------------------------------------
+        private async Task ProcesarSalidaFIFO(MovimientoInventario movimiento, Inventario inventario, Almacen almacen)
+        {
+            int cantidadRequerida = movimiento.CantidadBuena ?? 0;
+
+            // Regla S1: Validación de stock
+            if (inventario.ProductoStock < cantidadRequerida)
+            {
+                throw new Exception($"Stock insuficiente: Solo quedan {inventario.ProductoStock} unidades en el inventario.");
+            }
+
+            // Regla B7: Seleccionar Lotes (FIFO: Ordenar por fecha de ingreso ascendente)
+            var lotes = await context.Lote
+                .Where(l => l.CodigoAlmacen == movimiento.CodigoAlmacen && l.CodigoProducto == movimiento.CodigoProducto && l.Cantidad > 0)
+                .OrderBy(l => l.FechaIngreso) // FIFO
+                .ToListAsync();
+
+            if (lotes.Count == 0)
+            {
+                throw new Exception("Error interno: Inventario dice tener stock, pero no se encontraron lotes activos.");
+            }
+
+            // Recorrer lotes y descontar la cantidad
+            foreach (var lote in lotes)
+            {
+                if (cantidadRequerida <= 0) break; // Ya se cubrió toda la venta
+
+                int cantidadADescontar = Math.Min(lote.Cantidad, cantidadRequerida);
+
+                // 1. Descontar del Lote
+                lote.Cantidad -= cantidadADescontar;
+
+                // 2. Liberar espacio en el Almacén (Regla A8: el espacio libre AUMENTA)
+                almacen.CantidadDisponible += cantidadADescontar;
+
+                // 3. Reducir la cantidad pendiente a vender
+                cantidadRequerida -= cantidadADescontar;
+
+                context.Lote.Update(lote);
+            }
+        }
         public async Task<MovimientoInventarioDTO> PutMovimientoInventario(string Codigo, [FromBody] MovimientoInventarioDTO dto)
         {
             var movimientoInventario = await context.MovimientoInventario.FirstOrDefaultAsync(c => c.Codigo == Codigo);

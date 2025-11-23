@@ -10,5 +10,6 @@ namespace AlmacenLP.Core.Interfaces
         Task<LoteDTO> PutLote(string Codigo, [FromBody] LoteDTO dto);
         Task<LoteDTO> PostLote([FromBody] LoteDTO dto);
         Task<LoteDTO> DeleteLote(string Codigo);
+        public Task RecalcularStockInventario(string CodigoAlmacen, string CodigoProducto);
     }
 }
