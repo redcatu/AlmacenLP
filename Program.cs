@@ -40,7 +40,7 @@ builder.Services.AddDbContext<AlmacenLPContext>(options =>
     options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
 // -----------------------------------------------------------------------------
-// SWAGGER/OPENAPI (AÑADIDO AQUÍ)
+// SWAGGER/OPENAPI
 // -----------------------------------------------------------------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(); // 1. Servicio de generación de Swagger
@@ -100,14 +100,11 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -----------------------------------------------------------------------------
-// SWAGGER PIPELINE (AÑADIDO AQUÍ)
+// SWAGGER PIPELINE (CORRECCIÓN: SIEMPRE ACTIVO)
 // -----------------------------------------------------------------------------
-if (app.Environment.IsDevelopment()) // Se habilita en desarrollo y en Railway
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(); // 2. Publicación de la interfaz Swagger UI
-}
-// NOTA: Para ambientes de producción como Railway, puedes simplemente quitar la condición 'if (app.Environment.IsDevelopment())' si quieres que esté siempre activo.
+app.UseSwagger();
+app.UseSwaggerUI(); // 2. Publicación de la interfaz Swagger UI
+
 
 app.UseCors("myApp");
 app.UseAuthorization();
