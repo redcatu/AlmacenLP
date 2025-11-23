@@ -24,6 +24,10 @@ namespace AlmacenLP.Infraestructura.Repositorio
             {
                 throw new Exception("Inventario no encontrado");
             }
+            if (inventario.ProductoStock > 0)
+            {
+                throw new Exception($"No se puede dar de baja el producto del almacén porque aún tiene {inventario.ProductoStock} unidades de stock.");
+            }
             inventario.Estado = "Borrado";
             context.Inventario.Update(inventario);
             await context.SaveChangesAsync();
@@ -49,12 +53,27 @@ namespace AlmacenLP.Infraestructura.Repositorio
 
         public async Task<InventarioDTO> PostInventario([FromBody] InventarioDTO dto)
         {
+            var existeProducto = await context.Producto.AnyAsync(p => p.Codigo == dto.CodigoProducto);
+            if (!existeProducto)
+                throw new Exception($"El producto {dto.CodigoProducto} no existe.");
+
+            var existeAlmacen = await context.Almacen.AnyAsync(a => a.Codigo == dto.CodigoAlmacen);
+            if (!existeAlmacen)
+                throw new Exception($"El almacén {dto.CodigoAlmacen} no existe.");
+
+            var existeInventario = await context.Inventario.AnyAsync(i=> i.CodigoAlmacen == dto.CodigoAlmacen && i.CodigoProducto == dto.CodigoProducto);
+            if (existeInventario)
+            {
+                throw new Exception("Ya existe un registro de Inventario para este producto en este almacén. Use la función de actualización.");
+            }
+
             var inventario = new Inventario
             {
                 CodigoAlmacen = dto.CodigoAlmacen,
                 CodigoProducto = dto.CodigoProducto,
+                CodigoLote = dto.CodigoLote,
                 Codigo = dto.Codigo,
-                ProductoStock = dto.ProductoStock
+                ProductoStock = 0
 
             };
             context.Inventario.Add(inventario);
@@ -69,10 +88,16 @@ namespace AlmacenLP.Infraestructura.Repositorio
             {
                 throw new Exception("Inventario no encontrado");
             }
-            inventario.CodigoAlmacen = dto.CodigoAlmacen;
-            inventario.CodigoProducto = dto.CodigoProducto;
+            if (inventario.ProductoStock != dto.ProductoStock)
+            {   
+                throw new Exception("No se puede modificar el Stock manualmente. Use Movimientos de Inventario o Ajustes.");
+            }
+            if (inventario.CodigoProducto != dto.CodigoProducto || inventario.CodigoAlmacen != dto.CodigoAlmacen)
+            {
+                throw new Exception("No se permite cambiar el Producto ni el Almacén de un registro de inventario existente.");
+            }
             inventario.CodigoLote = dto.CodigoLote;
-            inventario.ProductoStock = dto.ProductoStock;
+            
             context.Inventario.Update(inventario);
             await context.SaveChangesAsync();
             return inventario.toInventarioDTO();
