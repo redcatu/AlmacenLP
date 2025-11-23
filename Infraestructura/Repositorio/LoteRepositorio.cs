@@ -87,7 +87,7 @@ namespace AlmacenLP.Infraestructura.Repositorio
                 FechaVencimiento = dto.FechaVencimiento
             };
             context.Lote.Add(lote);
-            almacen.CantidadDisponible=nuevoStockAlmacen;
+            
             context.Almacen.Update(almacen);
 
             await context.SaveChangesAsync();
