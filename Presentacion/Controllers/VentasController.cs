@@ -13,6 +13,7 @@ namespace AlmacenLP.Presentacion.Controllers
         {
             this.ventasRepositorio = ventasRepositorio;
         }
+        // GET: api/Ventas/Ventas
         [HttpGet("Ventas")]
         public async Task<IActionResult> GetProductoCantidad()
         {
@@ -23,7 +24,18 @@ namespace AlmacenLP.Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener datos: {ex.Message}");
+                // Diagnóstico mejorado:
+                // Si la excepción indica un error HTTP (generado por el repositorio), 
+                // podemos devolver un código de "Failed Dependency" (424) o "Service Unavailable" (503).
+                if (ex.Message.StartsWith("Error HTTP"))
+                {
+                    // Devolvemos 503 para indicar que el servicio de ventas no está disponible o falló internamente.
+                    // Esto evita que nuestro API devuelva un 500 falso.
+                    return StatusCode(503, $"Error en dependencia externa (Ventas API): {ex.Message}");
+                }
+
+                // Para cualquier otro error (ej. falló la deserialización o configuración en nuestro lado)
+                return StatusCode(500, $"Error interno al procesar datos: {ex.Message}");
             }
         }
     }
