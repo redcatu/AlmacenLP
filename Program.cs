@@ -70,6 +70,7 @@ builder.Services.AddScoped<IMovimientoInventarioRepositorio, MovimientoInventari
 builder.Services.AddScoped<IAlmacenRepositorio, AlmacenRepositorio>();
 builder.Services.AddScoped<IInventarioRepositorio, InventarioRepositorio>();
 builder.Services.AddScoped<ILoteRepositorio, LoteRepositorio>();
+builder.Services.AddScoped<IVentasRepositorio, VentasRepositorio>();
 
 var app = builder.Build();
 
